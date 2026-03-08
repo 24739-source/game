@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Memory Match Game</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>🎮 Memory Match Game</h1>
+        <div class="stats">
+            <p>Moves: <span id="moves">0</span></p>
+            <p>Pairs Found: <span id="pairs">0</span>/8</p>
+        </div>
+        <div class="game-board" id="gameBoard"></div>
+        <button class="restart-btn" onclick="resetGame()">Restart Game</button>
+    </div>
+
+    <script>
+        const cards = ['🍎', '🍌', '🍕', '🎸', '🍎', '🍌', '🍕', '🎸',
+                       '⚽', '🎾', '🎲', '🎯', '⚽', '🎾', '🎲', '🎯'];
+        
+        let gameBoard = document.getElementById('gameBoard');
+        let flipped = [];
+        let matched = [];
+        let moves = 0;
+        let pairsFound = 0;
+
+        function initGame() {
+            // Shuffle cards
+            const shuffled = [...cards].sort(() => Math.random() - 0.5);
+            gameBoard.innerHTML = '';
+            flipped = [];
+            matched = [];
+            moves = 0;
+            pairsFound = 0;
+            document.getElementById('moves').textContent = 0;
+            document.getElementById('pairs').textContent = '0';
+
+            shuffled.forEach((card, index) => {
+                const cardEl = document.createElement('div');
+                cardEl.className = 'card';
+                cardEl.textContent = '?';
+                cardEl.dataset.value = card;
+                cardEl.dataset.index = index;
+                cardEl.onclick = () => flipCard(cardEl);
+                gameBoard.appendChild(cardEl);
+            });
+        }
+
+        function flipCard(cardEl) {
+            if (flipped.length < 2 && !cardEl.classList.contains('flipped') && !matched.includes(cardEl.dataset.index)) {
+                cardEl.classList.add('flipped');
+                cardEl.textContent = cardEl.dataset.value;
+                flipped.push(cardEl);
+
+                if (flipped.length === 2) {
+                    moves++;
+                    document.getElementById('moves').textContent = moves;
+                    checkMatch();
+                }
+            }
+        }
+
+        function checkMatch() {
+            const [card1, card2] = flipped;
+
+            if (card1.dataset.value === card2.dataset.value) {
+                // Match found!
+                card1.classList.add('matched');
+                card2.classList.add('matched');
+                matched.push(card1.dataset.index, card2.dataset.index);
+                pairsFound++;
+                document.getElementById('pairs').textContent = pairsFound;
+                flipped = [];
+
+                if (pairsFound === 8) {
+                    setTimeout(() => alert(`🎉 You won! Completed in ${moves} moves!`), 300);
+                }
+            } else {
+                // No match, flip back
+                setTimeout(() => {
+                    card1.classList.remove('flipped');
+                    card2.classList.remove('flipped');
+                    card1.textContent = '?';
+                    card2.textContent = '?';
+                    flipped = [];
+                }, 1000);
+            }
+        }
+
+        function resetGame() {
+            initGame();
+        }
+
+        // Start the game
+        initGame();
+    </script>
+</body>
+</html>
